@@ -1,0 +1,8 @@
+*.sw[op]
+*.py[oc]
+*.log
+credentials.txt
+data/*
+output/*
+.ropeproject/*
+ghostdriver.log
