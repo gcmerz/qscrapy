@@ -1,12 +1,9 @@
 import errno
-import logging
 import os
 import requests
 
 from bs4 import BeautifulSoup
 from selenium import webdriver
-
-logger = logging.getLogger(__name__)
 
 
 class HTTPError(Exception): pass
@@ -19,6 +16,15 @@ class RequestMaker(object):
         self.password = password
         self.data_dir = data_dir
         self.base_url = 'https://webapps.fas.harvard.edu'
+
+    @classmethod
+    def copy(cls, requester):
+        new_requester = cls(requester.username,
+                            requester.password,
+                            requester.data_dir)
+        new_requester.base_url = requester.base_url
+        new_requester.cookies = {k: v for k, v in requester.cookies.items()}
+        return new_requester
 
     def _get_cookies(self):
         driver = webdriver.PhantomJS(service_args=['--ignore-ssl-errors=true'])
@@ -43,7 +49,6 @@ class RequestMaker(object):
             # Make sure we have cookies
             if not self.cookies:
                 print 'No cookies, getting them now'
-                logger.warning('No cookies, getting them now')
                 self.cookies = self._get_cookies()
 
             # Make request
@@ -56,7 +61,6 @@ class RequestMaker(object):
             soup = BeautifulSoup(r.text, 'lxml')
             if soup.title is not None and soup.title.text == 'HarvardKey Login':
                 print 'Cookies are invalid: retrieving them then trying again'
-                logger.warning('Cookies are invalid: retrieving them then trying again')
                 self.cookies = self._get_cookies()
                 return self.make_request(path)
 

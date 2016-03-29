@@ -1,4 +1,5 @@
 import json
+from multiprocessing import Pool
 import os
 import sys
 
@@ -172,14 +173,24 @@ def main():
     if not os.path.exists('output'):
         os.makedirs('output')
 
-    existing_outputs = map(int, os.listdir('output'))
+    existing_outputs = map(int, filter(str.isdigit, os.listdir('output')))
     new_output = 0 if not existing_outputs else max(existing_outputs) + 1
     output_dir = os.path.join('output', str(new_output))
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
-    scrape_term(requester, output_dir, 2015, 1)
+    year_terms = [(2015, 1), (2014, 2), (2014, 1), (2013, 2), (2013, 1),
+                  (2012, 2), (2012, 1), (2011, 2), (2011, 1), (2010, 2),
+                  (2010, 1), (2009, 2), (2009, 1), (2008, 2), (2008, 1),
+                  (2007, 2), (2007, 1), (2006, 2), (2006, 1)]
 
+    args = [(requester, output_dir, year, term) for year, term in year_terms]
+    p = Pool(5)
+    p.map(_helper, args)
+
+
+def _helper((requester, output_dir, year, term)):
+    scrape_term(RequestMaker.copy(requester), output_dir, year, term)
 
 if __name__ == '__main__':
     # Don't buffer stdout
