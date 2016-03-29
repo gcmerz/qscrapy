@@ -26,6 +26,10 @@ def scrape_term(requester, output_dir, year, term):
 
 
 def scrape_course(requester, output_dir, course_id, year, term):
+    if course_id in (44050,):
+        print 'There is some weird shit going on with course {}'.format(course_id)
+        return
+
     c = Course(course_id=course_id, year=year, term=term)
     base_url = '/course_evaluation_reports/fas/course_summary.html'
     url = '{base_url}?course_id={course_id}'.format(base_url=base_url,
@@ -49,6 +53,10 @@ def scrape_course(requester, output_dir, course_id, year, term):
 
     # Get course ratings
     graph_reports = soup.select('.graphReport')
+    if not graph_reports:
+        print 'No data for course {}'.format(course_id)
+        return
+
     c.ratings = []
     for graph_report in graph_reports[:-1]:
         c.ratings += scrape_ratings(graph_report)
