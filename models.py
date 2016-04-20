@@ -4,17 +4,32 @@ RatingBreakdown = namedtuple('RatingBreakdown', ['one', 'two', 'three', 'four', 
 
 
 class Model(object):
+    """
+    Base class for objects corresponding to objects in the Q guide.
+    """
     def __init__(self, **kwargs):
         raise NotImplementedError
 
     def validate(self):
+        """
+        Ensure that all fields are filled out and have correct types.
+        Raises an AssertionError if it fails
+        """
         raise NotImplementedError
 
     def to_json_dict(self):
+        """
+        Turns the object into a dictionary that can be serialised into JSON.
+        Most objects use OrderedDicts in order to make the resultant JSON more
+        readable.
+        """
         raise NotImplementedError
 
 
 class Course(object):
+    """
+    Object representing a course taught in a specific term.
+    """
     def __init__(self, **kwargs):
         self.course_id = kwargs.get('course_id')
         self.department = kwargs.get('department')
@@ -76,6 +91,10 @@ class Course(object):
 
 
 class Rating(object):
+    """
+    Ther rating for a particluar category (i.e. 'difficulty') for a particular
+    Course
+    """
     def __init__(self, **kwargs):
         self.category = kwargs.get('category')
         self.breakdown = kwargs.get('breakdown')
@@ -100,6 +119,9 @@ class Rating(object):
 
 
 class Reasons(object):
+    """
+    Reasons why students took a particular course (i.e. gened, elective, etc.)
+    """
     def __init__(self, **kwargs):
         self.total_responses = kwargs.get('total_responses')
         self.breakdown = kwargs.get('breakdown')
@@ -108,7 +130,7 @@ class Reasons(object):
         assert isinstance(self.total_responses, int)
         assert isinstance(self.breakdown, dict)
 
-        expected_keys = set((
+        expected_keys_1 = set((
             'Elective',
             'Concentration or Department Requirement',
             'Secondary Field or Language Citation Requirement',
@@ -117,7 +139,17 @@ class Reasons(object):
             'Foreign Language Requirement',
             'Pre-Med Requirement'))
 
-        assert set(self.breakdown.keys()) == expected_keys
+        # Set of allowed reasons changed in ~2007
+        expected_keys_2 = set((
+            'Elective',
+            'Concentration/Program Requirement',
+            'Undergraduate Core Requirement',
+            'Pre-Med Requirement'
+        ))
+
+        actual_keys = set(self.breakdown.keys())
+        assert actual_keys == expected_keys_1 or actual_keys == expected_keys_2
+
         for v in self.breakdown.values():
             assert isinstance(v, int)
 
@@ -129,6 +161,10 @@ class Reasons(object):
 
 
 class Instructor(object):
+    """
+    Ratings for a particular instructor teaching a particular Course in a
+    particular semester
+    """
     def __init__(self, **kwargs):
         self.instructor_id = kwargs.get('instructor_id')
         self.instructor_role = kwargs.get('instructor_role')
@@ -158,6 +194,10 @@ class Instructor(object):
 
 
 class Question(object):
+    """
+    Question (with student responses) about a particluar course. Most common
+    question asked is "What would you tell future students about this course?"
+    """
     def __init__(self, **kwargs):
         self.question = kwargs.get('question')
         self.responses = kwargs.get('responses')

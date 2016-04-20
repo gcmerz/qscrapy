@@ -10,6 +10,11 @@ class HTTPError(Exception): pass
 
 
 class RequestMaker(object):
+    """
+    Makes HTTP requests to the Q guide. Automatically logs in using selenium
+    using credentials provided during construction if necessary. Also caches
+    data in filesystem to speed up future runs of the program.
+    """
     def __init__(self, username, password, data_dir='data'):
         self.cookies = {}
         self.username = username
@@ -19,6 +24,12 @@ class RequestMaker(object):
 
     @classmethod
     def copy(cls, requester):
+        """
+        Copies a RequestMaker, returning a brand new but idententical
+        RequestMaker, complete with credentials and cookies. One RequestMaker
+        cannot safely be shared accross processes, and so method can be used
+        to copy a RequsetMaker for use in another process.
+        """
         new_requester = cls(requester.username,
                             requester.password,
                             requester.data_dir)
@@ -27,6 +38,10 @@ class RequestMaker(object):
         return new_requester
 
     def _get_cookies(self):
+        """
+        Logs in to the Q Guide using selenium, and returns the cookies it
+        receives
+        """
         driver = webdriver.PhantomJS(service_args=['--ignore-ssl-errors=true'])
         driver.get(self.base_url + '/course_evaluation_reports/fas/list')
         driver.find_element_by_css_selector('#HUID').click()
@@ -39,8 +54,14 @@ class RequestMaker(object):
         return {c['name']: c['value'] for c in cookies_raw}
 
     def make_request(self, path):
+        """
+        Returns data from `path`. It first checks to see if the data is cached
+        on the filesystem, and if not, it fetches and downloads the data.
+        """
         print 'Getting data for {}'.format(path)
         soup = None
+
+        # First try to get cached data
         filepath = os.path.join(self.data_dir, path[1:])
         try:
             with open(filepath) as f:
@@ -53,7 +74,7 @@ class RequestMaker(object):
 
             # Make request
             url = self.base_url + path
-            r = requests.get(url, cookies=self.cookies)
+            r = requests.get(url, cookies=self.cookies, verify=False)
             if not r.ok:
                 raise HTTPError('Request to path {} failed with HTTP status code {}'.format(path, r.status))
 
