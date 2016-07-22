@@ -46,9 +46,9 @@ class Course(object):
 
     def validate(self):
         assert isinstance(self.course_id, int)
-        assert isinstance(self.department, basestring)
-        assert isinstance(self.course_code, basestring)
-        assert isinstance(self.course_name, basestring)
+        assert isinstance(self.department, str)
+        assert isinstance(self.course_code, str)
+        assert isinstance(self.course_name, str)
         assert isinstance(self.term, int)
         assert isinstance(self.year, int)
         assert isinstance(self.enrollment, int)
@@ -92,7 +92,7 @@ class Course(object):
 
 class Rating(object):
     """
-    Ther rating for a particluar category (i.e. 'difficulty') for a particular
+    Ther rating for a particluar category (e.g. 'difficulty') for a particular
     Course
     """
     def __init__(self, **kwargs):
@@ -100,7 +100,7 @@ class Rating(object):
         self.breakdown = kwargs.get('breakdown')
 
     def validate(self):
-        assert isinstance(self.category, basestring)
+        assert isinstance(self.category, str)
         try:
             assert isinstance(self.breakdown, RatingBreakdown)
         except AssertionError:
@@ -173,10 +173,10 @@ class Instructor(object):
         self.ratings = kwargs.get('ratings')
 
     def validate(self):
-        assert isinstance(self.instructor_id, basestring)
-        assert isinstance(self.instructor_role, basestring)
-        assert isinstance(self.first_name, basestring)
-        assert isinstance(self.last_name, basestring)
+        assert isinstance(self.instructor_id, str)
+        assert isinstance(self.instructor_role, str)
+        assert isinstance(self.first_name, str)
+        assert isinstance(self.last_name, str)
         assert isinstance(self.ratings, list)
 
         for r in self.ratings:
@@ -203,11 +203,11 @@ class Question(object):
         self.responses = kwargs.get('responses')
 
     def validate(self):
-        assert isinstance(self.question, basestring)
+        assert isinstance(self.question, str)
         assert isinstance(self.responses, list)
 
         for r in self.responses:
-            assert isinstance(r, basestring)
+            assert isinstance(r, str)
 
     def to_json_dict(self):
         return OrderedDict([

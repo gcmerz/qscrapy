@@ -58,18 +58,18 @@ class RequestMaker(object):
         Returns data from `path`. It first checks to see if the data is cached
         on the filesystem, and if not, it fetches and downloads the data.
         """
-        print 'Getting data for {}'.format(path)
+        print('Getting data for {}'.format(path))
         soup = None
 
         # First try to get cached data
         filepath = os.path.join(self.data_dir, path[1:])
         try:
             with open(filepath) as f:
-                soup = BeautifulSoup(f.read().decode('utf8'), 'lxml')
+                soup = BeautifulSoup(f.read(), 'lxml')
         except IOError:
             # Make sure we have cookies
             if not self.cookies:
-                print 'No cookies, getting them now'
+                print('No cookies, getting them now')
                 self.cookies = self._get_cookies()
 
             # Make request
@@ -81,7 +81,7 @@ class RequestMaker(object):
             # Make sure cookies were valid
             soup = BeautifulSoup(r.text, 'lxml')
             if soup.title is not None and soup.title.text == 'HarvardKey Login':
-                print 'Cookies are invalid: retrieving them then trying again'
+                print('Cookies are invalid: retrieving them then trying again')
                 self.cookies = self._get_cookies()
                 return self.make_request(path)
 
@@ -94,6 +94,6 @@ class RequestMaker(object):
                     if exc.errno != errno.EEXIST:
                         raise
             with open(filepath, 'w') as f:
-                f.write(r.text.encode('utf8'))
+                f.write(r.text)
 
         return soup

@@ -53,7 +53,7 @@ def scrape_course(requester, output_dir, course_id, year, term):
     """
     # This course is weird. Let's skip it.
     if course_id in (44050,):
-        print 'There is some weird shit going on with course {}'.format(course_id)
+        print('There is some weird shit going on with course {}'.format(course_id))
         return
 
     c = Course(course_id=course_id, year=year, term=term)
@@ -65,7 +65,7 @@ def scrape_course(requester, output_dir, course_id, year, term):
 
     # Get course name, department, enrollment, etc.
     if soup.h1 is None:
-        print 'No data for course {}'.format(course_id)
+        print('No data for course {}'.format(course_id))
         return
 
     title = soup.h1.text
@@ -80,7 +80,7 @@ def scrape_course(requester, output_dir, course_id, year, term):
     # Get course ratings
     graph_reports = soup.select('.graphReport')
     if not graph_reports:
-        print 'No data for course {}'.format(course_id)
+        print('No data for course {}'.format(course_id))
         return
 
     c.ratings = []
@@ -151,22 +151,22 @@ def scrape_instuctors(requester, course_id, instr_id=None):
     select = soup.select('select[name="current_instructor_or_tf_huid_param"]')[0]
 
     if not select.select('option'):
-        print 'No instructors found for this course'
+        print('No instructors found for this course')
         return []
 
     option = select.select('option[selected="selected"]')[0]
     id_role = option.attrs['value']
     instr.instructor_id, instr.instructor_role = id_role.split(':')
-    instr.last_name, instr.first_name = map(unicode.strip, option.text.split(','))
+    instr.last_name, instr.first_name = map(str.strip, option.text.split(','))
 
     graph_reports = soup.select('.graphReport')
     if not graph_reports:
         instr.ratings = []
-        print 'No ratings for instructor {} {}'.format(instr.first_name,
-                                                       instr.last_name)
+        print('No ratings for instructor {} {}'.format(instr.first_name,
+                                                       instr.last_name))
     else:
         if len(graph_reports) != 1:
-            print 'More than one graph report found'
+            print('More than one graph report found')
         instr.ratings = scrape_ratings(graph_reports[0])
     instr_lst = [instr]
 
@@ -231,10 +231,11 @@ def main():
     p.map(_helper, args)
 
 
-def _helper((requester, output_dir, year, term)):
+def _helper(t):
+    (requester, output_dir, year, term) = t
     scrape_term(RequestMaker.copy(requester), output_dir, year, term)
 
 if __name__ == '__main__':
     # Don't buffer stdout
-    sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
+    sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 1)
     main()
